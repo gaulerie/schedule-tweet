@@ -1,10 +1,4 @@
 {
-  "2030-07-17T09:23:00": { "A simple text only tweet": "" },
-  "2030-07-17T09:13:00": { "": "images/4.jpg" },
-  "2030-07-17T08:23:00": { "Tweet with image": "images/2.jpg" },
-  "2030-07-16T09:23:00": {
-    "Tweet with link and images\nhttps://docs.tweepy.org/en/stable/index.html": "images/3.jpg"
-  },
   "2024-06-07T14:35:00": {
     "This is a thread 1/3": "test",
     "First reply with image 2/3": "images/1.jpg",
