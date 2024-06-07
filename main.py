@@ -19,7 +19,7 @@ now = pendulum.now("Asia/Dhaka")
 with open("tweet.json") as file:
     tweets = json.load(file)
     for time in list(tweets):
-        tweet_time = pendulum.parse(time, tz="Asia/Dhaka")
+        tweet_time = pendulum.parse(time, tz="Europe/Paris")
         if tweet_time < now:
             if len(tweets[time].keys()) == 1:
                 for tweet_text, image_path in tweets[time].items():
