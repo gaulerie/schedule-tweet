@@ -25,12 +25,13 @@ with open("tweet.json") as file:
         if tweet_time < now:
             if len(tweets[time].keys()) == 1:
                 for tweet_text, image_path in tweets[time].items():
+                    unique_tweet_text = f"{tweet_text} - {now.to_iso8601_string()}"
                     if tweet_text and image_path:
                         media = api_v1.media_upload(image_path)
-                        client_v2.create_tweet(text=tweet_text, media_ids=[media.media_id_string])
+                        client_v2.create_tweet(text=unique_tweet_text, media_ids=[media.media_id_string])
                         os.remove(image_path)
                     elif tweet_text:
-                        client_v2.create_tweet(text=tweet_text)
+                        client_v2.create_tweet(text=unique_tweet_text)
                     elif image_path:
                         media = api_v1.media_upload(image_path)
                         client_v2.create_tweet(media_ids=[media.media_id_string])
@@ -38,16 +39,17 @@ with open("tweet.json") as file:
             else:
                 prev_tweet_id = None
                 for index, (tweet_text, image_path) in enumerate(tweets[time].items()):
+                    unique_tweet_text = f"{tweet_text} - {now.to_iso8601_string()}"
                     if index == 0:
                         if tweet_text and image_path:
                             media = api_v1.media_upload(image_path)
                             prev_tweet = client_v2.create_tweet(
-                                text=tweet_text, media_ids=[media.media_id_string]
+                                text=unique_tweet_text, media_ids=[media.media_id_string]
                             )
                             prev_tweet_id = prev_tweet.data["id"]
                             os.remove(image_path)
                         elif tweet_text:
-                            prev_tweet = client_v2.create_tweet(text=tweet_text)
+                            prev_tweet = client_v2.create_tweet(text=unique_tweet_text)
                             prev_tweet_id = prev_tweet.data["id"]
                         elif image_path:
                             media = api_v1.media_upload(image_path)
@@ -59,7 +61,7 @@ with open("tweet.json") as file:
                     elif tweet_text and image_path:
                         media = api_v1.media_upload(image_path)
                         prev_tweet = client_v2.create_tweet(
-                            text=tweet_text,
+                            text=unique_tweet_text,
                             media_ids=[media.media_id_string],
                             in_reply_to_tweet_id=prev_tweet_id,
                         )
@@ -67,7 +69,7 @@ with open("tweet.json") as file:
                         os.remove(image_path)
                     elif tweet_text:
                         prev_tweet = client_v2.create_tweet(
-                            text=tweet_text,
+                            text=unique_tweet_text,
                             in_reply_to_tweet_id=prev_tweet_id,
                         )
                         prev_tweet_id = prev_tweet.data["id"]
