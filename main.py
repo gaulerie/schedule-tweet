@@ -20,12 +20,26 @@ bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
 client_v2 = tweepy.Client(bearer_token, consumer_key, consumer_secret_key, access_token, access_token_secret)
 
 # Récupérer les données depuis le déploiement Google Apps Script
-response = requests.get("https://script.google.com/macros/s/AKfycbwOKMaljj2zYgT09EEz-eBLMYbs6DUd6514_MxlxNDWZNZoikJGlq3yaDuqkLqRx8R9/exec")
-if response.status_code == 200:
-    tweets = response.json()
-else:
+url = "https://script.google.com/macros/s/AKfycbwOKMaljj2zYgT09EEz-eBLMYbs6DUd6514_MxlxNDWZNZoikJGlq3yaDuqkLqRx8R9/exec"
+response = requests.get(url)
+
+# Vérification du statut de la réponse
+if response.status_code != 200:
     print(f"Erreur lors de la récupération des données : {response.status_code}")
-    tweets = {}
+    print(response.text)
+    exit(1)
+
+# Afficher la réponse brute pour débogage
+print("Réponse brute :")
+print(response.text)
+
+# Tentative de conversion de la réponse en JSON
+try:
+    tweets = response.json()
+except json.JSONDecodeError as e:
+    print("Erreur lors de la conversion de la réponse en JSON :")
+    print(e)
+    exit(1)
 
 # Initialiser le fuseau horaire
 now = pendulum.now("Asia/Dhaka")
