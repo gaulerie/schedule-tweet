@@ -20,7 +20,7 @@ bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
 client_v2 = tweepy.Client(bearer_token, consumer_key, consumer_secret_key, access_token, access_token_secret)
 
 # Récupérer les données depuis le déploiement Google Apps Script
-url = "https://script.google.com/macros/s/AKfycbwOKMaljj2zYgT09EEz-eBLMYbs6DUd6514_MxlxNDWZNZoikJGlq3yaDuqkLqRx8R9/exec"
+url = "https://script.google.com/macros/s/AKfycbzM6FbGGxxEUYEx5ZPihOROkrGHWJoVxUYbbMstv8xSJsnFD2n19AHKjwIjNBVFuStp/exec"
 response = requests.get(url)
 
 # Vérification du statut de la réponse
@@ -45,45 +45,30 @@ except json.JSONDecodeError as e:
 now = pendulum.now("Europe/Paris")
 
 # Publier les tweets
-for time in list(tweets):
-    tweet_time = pendulum.parse(time, tz="Europe/Paris")
+for time, tweets_dict in tweets.items():
+    tweet_time = pendulum.parse(time, tz="Asia/Tokyo")  # Utiliser le bon fuseau horaire pour le timestamp
     if tweet_time < now:
-        if len(tweets[time].keys()) == 1:
-            for tweet_text, image_path in tweets[time].items():
-                unique_tweet_text = f"{tweet_text} - {uuid.uuid4()}"
+        prev_tweet_id = None
+        for index, (tweet_text, image_path) in enumerate(tweets_dict.items()):
+            unique_tweet_text = f"{tweet_text} - {uuid.uuid4()}"
+            if index == 0:
                 if tweet_text and image_path:
                     media = api_v1.media_upload(image_path)
-                    client_v2.create_tweet(text=unique_tweet_text, media_ids=[media.media_id_string])
+                    prev_tweet = client_v2.create_tweet(
+                        text=unique_tweet_text, media_ids=[media.media_id_string]
+                    )
+                    prev_tweet_id = prev_tweet.data["id"]
                     os.remove(image_path)
                 elif tweet_text:
-                    client_v2.create_tweet(text=unique_tweet_text)
+                    prev_tweet = client_v2.create_tweet(text=unique_tweet_text)
+                    prev_tweet_id = prev_tweet.data["id"]
                 elif image_path:
                     media = api_v1.media_upload(image_path)
-                    client_v2.create_tweet(media_ids=[media.media_id_string])
+                    prev_tweet = client_v2.create_tweet(media_ids=[media.media_id_string])
+                    prev_tweet_id = prev_tweet.data["id"]
                     os.remove(image_path)
-        else:
-            prev_tweet_id = None
-            for index, (tweet_text, image_path) in enumerate(tweets[time].items()):
-                unique_tweet_text = f"{tweet_text} - {uuid.uuid4()}"
-                if index == 0:
-                    if tweet_text and image_path:
-                        media = api_v1.media_upload(image_path)
-                        prev_tweet = client_v2.create_tweet(
-                            text=unique_tweet_text, media_ids=[media.media_id_string]
-                        )
-                        prev_tweet_id = prev_tweet.data["id"]
-                        os.remove(image_path)
-                    elif tweet_text:
-                        prev_tweet = client_v2.create_tweet(text=unique_tweet_text)
-                        prev_tweet_id = prev_tweet.data["id"]
-                    elif image_path:
-                        media = api_v1.media_upload(image_path)
-                        prev_tweet = client_v2.create_tweet(
-                            media_ids=[media.media_id_string]
-                        )
-                        prev_tweet_id = prev_tweet.data["id"]
-                        os.remove(image_path)
-                elif tweet_text and image_path:
+            else:
+                if tweet_text and image_path:
                     media = api_v1.media_upload(image_path)
                     prev_tweet = client_v2.create_tweet(
                         text=unique_tweet_text,
