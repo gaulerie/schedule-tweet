@@ -42,7 +42,7 @@ except json.JSONDecodeError as e:
     exit(1)
 
 # Initialiser le fuseau horaire
-now = pendulum.now("Asia/Dhaka")
+now = pendulum.now("Europe/Paris")
 
 # Publier les tweets
 for time in list(tweets):
