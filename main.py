@@ -46,6 +46,8 @@ except json.JSONDecodeError as e:
 now = pendulum.now("Europe/Paris")
 
 # Publier les tweets
+keys_to_remove = []
+
 for time, tweets_dict in tweets.items():
     try:
         # Supprimer la partie en parenthèses de la chaîne de date
@@ -101,7 +103,11 @@ for time, tweets_dict in tweets.items():
                     )
                     prev_tweet_id = prev_tweet.data["id"]
                     os.remove(image_path)
-        tweets.pop(time)
+        keys_to_remove.append(time)
+
+# Supprimer les clés après l'itération
+for key in keys_to_remove:
+    tweets.pop(key)
 
 # Enregistrer les tweets restants dans le fichier JSON
 with open("tweet.json", "w") as file:
