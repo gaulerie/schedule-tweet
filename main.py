@@ -2,6 +2,7 @@ import os
 import json
 import tweepy
 import pendulum
+import uuid
 
 # Configurer l'API v1.1 pour le téléchargement de médias
 consumer_key = os.environ.get("TWITTER_CONSUMER_KEY")
@@ -25,7 +26,7 @@ with open("tweet.json") as file:
         if tweet_time < now:
             if len(tweets[time].keys()) == 1:
                 for tweet_text, image_path in tweets[time].items():
-                    unique_tweet_text = f"{tweet_text} - {now.to_iso8601_string()}"
+                    unique_tweet_text = f"{tweet_text} - {uuid.uuid4()}"
                     if tweet_text and image_path:
                         media = api_v1.media_upload(image_path)
                         client_v2.create_tweet(text=unique_tweet_text, media_ids=[media.media_id_string])
@@ -39,7 +40,7 @@ with open("tweet.json") as file:
             else:
                 prev_tweet_id = None
                 for index, (tweet_text, image_path) in enumerate(tweets[time].items()):
-                    unique_tweet_text = f"{tweet_text} - {now.to_iso8601_string()}"
+                    unique_tweet_text = f"{tweet_text} - {uuid.uuid4()}"
                     if index == 0:
                         if tweet_text and image_path:
                             media = api_v1.media_upload(image_path)
