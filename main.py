@@ -4,6 +4,7 @@ import tweepy
 import pendulum
 import uuid
 import requests
+from datetime import datetime
 
 # Configurer l'API v1.1 pour le téléchargement de médias
 consumer_key = os.environ.get("TWITTER_CONSUMER_KEY")
@@ -46,7 +47,14 @@ now = pendulum.now("Europe/Paris")
 
 # Publier les tweets
 for time, tweets_dict in tweets.items():
-    tweet_time = pendulum.parse(time, tz="Asia/Tokyo")  # Utiliser le bon fuseau horaire pour le timestamp
+    try:
+        # Analyser la chaîne de date et la convertir en un objet pendulum
+        tweet_time = datetime.strptime(time, '%a %b %d %Y %H:%M:%S GMT%z (%Z)')
+        tweet_time = pendulum.instance(tweet_time)
+    except ValueError as e:
+        print(f"Erreur lors de l'analyse de la date : {e}")
+        continue
+
     if tweet_time < now:
         prev_tweet_id = None
         for index, (tweet_text, image_path) in enumerate(tweets_dict.items()):
