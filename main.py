@@ -62,17 +62,16 @@ for time, tweets_dict in tweets.items():
     if tweet_time < now:
         prev_tweet_id = None
         for index, (tweet_text, image_path) in enumerate(tweets_dict.items()):
-            unique_tweet_text = f"{tweet_text} - {uuid.uuid4()}"
             if index == 0:
                 if tweet_text and image_path:
                     media = api_v1.media_upload(image_path)
                     prev_tweet = client_v2.create_tweet(
-                        text=unique_tweet_text, media_ids=[media.media_id_string]
+                        text=tweet_text, media_ids=[media.media_id_string]
                     )
                     prev_tweet_id = prev_tweet.data["id"]
                     os.remove(image_path)
                 elif tweet_text:
-                    prev_tweet = client_v2.create_tweet(text=unique_tweet_text)
+                    prev_tweet = client_v2.create_tweet(text=tweet_text)
                     prev_tweet_id = prev_tweet.data["id"]
                 elif image_path:
                     media = api_v1.media_upload(image_path)
@@ -83,7 +82,7 @@ for time, tweets_dict in tweets.items():
                 if tweet_text and image_path:
                     media = api_v1.media_upload(image_path)
                     prev_tweet = client_v2.create_tweet(
-                        text=unique_tweet_text,
+                        text=tweet_text,
                         media_ids=[media.media_id_string],
                         in_reply_to_tweet_id=prev_tweet_id,
                     )
@@ -91,7 +90,7 @@ for time, tweets_dict in tweets.items():
                     os.remove(image_path)
                 elif tweet_text:
                     prev_tweet = client_v2.create_tweet(
-                        text=unique_tweet_text,
+                        text=tweet_text,
                         in_reply_to_tweet_id=prev_tweet_id,
                     )
                     prev_tweet_id = prev_tweet.data["id"]
