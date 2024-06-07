@@ -48,8 +48,10 @@ now = pendulum.now("Europe/Paris")
 # Publier les tweets
 for time, tweets_dict in tweets.items():
     try:
+        # Supprimer la partie en parenthèses de la chaîne de date
+        time_without_parens = time.split(' (')[0]
         # Analyser la chaîne de date et la convertir en un objet pendulum
-        tweet_time = datetime.strptime(time, '%a %b %d %Y %H:%M:%S GMT%z (%Z)')
+        tweet_time = datetime.strptime(time_without_parens, '%a %b %d %Y %H:%M:%S %Z%z')
         tweet_time = pendulum.instance(tweet_time)
     except ValueError as e:
         print(f"Erreur lors de l'analyse de la date : {e}")
