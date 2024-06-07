@@ -18,7 +18,7 @@ api_v1 = tweepy.API(auth)
 bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
 client_v2 = tweepy.Client(bearer_token, consumer_key, consumer_secret_key, access_token, access_token_secret)
 
-now = pendulum.now("Asia/Dhaka")
+now = pendulum.now("Europe/Paris")
 with open("tweet.json") as file:
     tweets = json.load(file)
     for time in list(tweets):
