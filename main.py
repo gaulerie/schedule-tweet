@@ -7,6 +7,7 @@ consumer_key = os.environ.get("TWITTER_CONSUMER_KEY")
 consumer_secret_key = os.environ.get("TWITTER_CONSUMER_SECRET_KEY")
 access_token = os.environ.get("TWITTER_ACCESS_TOKEN")
 access_token_secret = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
+bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
 
 auth = tweepy.OAuthHandler(
     consumer_key=consumer_key, consumer_secret=consumer_secret_key
