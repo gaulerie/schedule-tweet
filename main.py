@@ -105,19 +105,18 @@ for time, tweets_dict in threads.items():
             for index in range(1, 11):
                 tweet_text = tweets_dict.get(f"Tweet{index}", "")
                 image_path = tweets_dict.get(f"Image{index}", "")
-                unique_tweet_text = f"{tweet_text} - {uuid.uuid4()}"
                 if index == 1:
                     if tweet_text and image_path:
                         print(f"Publication du premier tweet avec image: {tweet_text}, Image: {image_path}")
                         media = api_v1.media_upload(image_path)
                         prev_tweet = client_v2.create_tweet(
-                            text=unique_tweet_text, media_ids=[media.media_id_string]
+                            text=tweet_text, media_ids=[media.media_id_string]
                         )
                         prev_tweet_id = prev_tweet.data["id"]
                         os.remove(image_path)
                     elif tweet_text:
                         print(f"Publication du premier tweet sans image: {tweet_text}")
-                        prev_tweet = client_v2.create_tweet(text=unique_tweet_text)
+                        prev_tweet = client_v2.create_tweet(text=tweet_text)
                         prev_tweet_id = prev_tweet.data["id"]
                     elif image_path:
                         print(f"Publication d'une image sans texte: {image_path}")
@@ -130,7 +129,7 @@ for time, tweets_dict in threads.items():
                         print(f"Publication d'un tweet de suivi avec image: {tweet_text}, Image: {image_path}")
                         media = api_v1.media_upload(image_path)
                         prev_tweet = client_v2.create_tweet(
-                            text=unique_tweet_text,
+                            text=tweet_text,
                             media_ids=[media.media_id_string],
                             in_reply_to_tweet_id=prev_tweet_id,
                         )
@@ -139,7 +138,7 @@ for time, tweets_dict in threads.items():
                     elif tweet_text:
                         print(f"Publication d'un tweet de suivi sans image: {tweet_text}")
                         prev_tweet = client_v2.create_tweet(
-                            text=unique_tweet_text,
+                            text=tweet_text,
                             in_reply_to_tweet_id=prev_tweet_id,
                         )
                         prev_tweet_id = prev_tweet.data["id"]
