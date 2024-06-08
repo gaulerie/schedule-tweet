@@ -55,6 +55,7 @@ print(json.dumps(anecdotes, indent=4))
 
 # Initialiser le fuseau horaire
 now = pendulum.now("Europe/Paris")
+print(f"Current time: {now}")
 
 # Publier les anecdotes
 if anecdotes:
@@ -91,6 +92,7 @@ for time, tweets_dict in threads.items():
         print(f"Tweet time : {tweet_time}, Current time : {now}")
 
         if tweet_time < now:
+            print(f"Le thread est prévu pour être publié.")
             prev_tweet_id = None
             for index in range(1, 11):
                 tweet_text = tweets_dict.get(f"Tweet{index}", "")
@@ -143,7 +145,8 @@ for time, tweets_dict in threads.items():
                         prev_tweet_id = prev_tweet.data["id"]
                         os.remove(image_path)
             keys_to_remove.append(time)
-
+        else:
+            print(f"Le thread n'est pas encore prévu pour être publié.")
     except Exception as e:
         print(f"Erreur lors du traitement du thread à l'heure {time} : {e}")
 
