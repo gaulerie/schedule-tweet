@@ -53,7 +53,7 @@ print(json.dumps(threads, indent=4))
 print("Anecdotes reçues :")
 print(json.dumps(anecdotes, indent=4))
 
-# Initialiser le fuseau horaire
+# Initialiser le fuseau horaire en UTC pour la comparaison
 now = pendulum.now("UTC")
 print(f"Current time (UTC): {now}")
 
@@ -67,20 +67,25 @@ if anecdotes:
         duration = anecdote.get("duration", 0)
         poll_options = [choice for choice in choices if choice]
 
-        if anecdote_text:
-            if image_url:
-                print("Publication d'une anecdote avec image:")
-                print(f"Texte: {anecdote_text}, Image URL: {image_url}")
-                media = api_v1.media_upload(image_url)
-                client_v2.create_tweet(text=anecdote_text, media_ids=[media.media_id_string])
-            elif poll_options and duration > 0:
-                print("Publication d'une anecdote avec sondage:")
-                print(f"Texte: {anecdote_text}, Options: {poll_options}, Durée: {duration}")
-                client_v2.create_tweet(text=anecdote_text, poll_options=poll_options, poll_duration_minutes=duration)
-            else:
-                print("Publication d'une anecdote sans image ni sondage:")
-                print(f"Texte: {anecdote_text}")
-                client_v2.create_tweet(text=anecdote_text)
+        # Convertir la date de l'anecdote en UTC pour comparaison
+        anecdote_time = pendulum.parse(date, tz="Europe/Paris").in_tz("UTC")
+        print(f"Anecdote time (UTC) : {anecdote_time}")
+
+        if anecdote_time < now:
+            if anecdote_text:
+                if image_url:
+                    print("Publication d'une anecdote avec image:")
+                    print(f"Texte: {anecdote_text}, Image URL: {image_url}")
+                    media = api_v1.media_upload(image_url)
+                    client_v2.create_tweet(text=anecdote_text, media_ids=[media.media_id_string])
+                elif poll_options and duration > 0:
+                    print("Publication d'une anecdote avec sondage:")
+                    print(f"Texte: {anecdote_text}, Options: {poll_options}, Durée: {duration}")
+                    client_v2.create_tweet(text=anecdote_text, poll_options=poll_options, poll_duration_minutes=duration)
+                else:
+                    print("Publication d'une anecdote sans image ni sondage:")
+                    print(f"Texte: {anecdote_text}")
+                    client_v2.create_tweet(text=anecdote_text)
 
 # Publier les tweets
 keys_to_remove = []
@@ -88,7 +93,8 @@ keys_to_remove = []
 for time, tweets_dict in threads.items():
     try:
         print(f"Traitement du thread pour l'heure : {time}")
-        tweet_time = pendulum.parse(time, tz="UTC")
+        # Convertir l'heure du thread en UTC pour comparaison
+        tweet_time = pendulum.parse(time, tz="Europe/Paris").in_tz("UTC")
         print(f"Tweet time (UTC) : {tweet_time}, Current time (UTC) : {now}")
 
         if tweet_time < now:
