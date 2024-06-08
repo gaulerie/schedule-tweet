@@ -39,8 +39,8 @@ try:
     data = response.json()
     print("Données JSON récupérées :")
     print(json.dumps(data, indent=4))  # Afficher les données JSON de manière lisible
-    tweets = data.get("threads", {})
-    anecdote_data = data.get("anecdotes", {})
+    threads = data.get("threads", {})
+    anecdotes = data.get("anecdotes", {})
 except json.JSONDecodeError as e:
     print("Erreur lors de la conversion de la réponse en JSON :")
     print(e)
@@ -50,26 +50,33 @@ except json.JSONDecodeError as e:
 now = pendulum.now("Europe/Paris")
 
 # Publier les anecdotes
-if anecdote_data:
-    anecdote_text = anecdote_data.get("text", "")
-    image_url = anecdote_data.get("imageUrl", "")
-    choices = anecdote_data.get("choices", [])
-    duration = anecdote_data.get("duration", 0)
+if anecdotes:
+    print("Traitement des anecdotes:")
+    anecdote_text = anecdotes.get("text", "")
+    image_url = anecdotes.get("imageUrl", "")
+    choices = anecdotes.get("choices", [])
+    duration = anecdotes.get("duration", 0)
     poll_options = [{"label": choice} for choice in choices if choice]
     
     if anecdote_text:
         if image_url:
+            print("Publication d'une anecdote avec image:")
+            print(f"Texte: {anecdote_text}, Image URL: {image_url}")
             media = api_v1.media_upload(image_url)
             client_v2.create_tweet(text=anecdote_text, media_ids=[media.media_id_string])
         elif poll_options and duration > 0:
+            print("Publication d'une anecdote avec sondage:")
+            print(f"Texte: {anecdote_text}, Options: {poll_options}, Durée: {duration}")
             client_v2.create_tweet(text=anecdote_text, poll_options=poll_options, poll_duration_minutes=duration)
         else:
+            print("Publication d'une anecdote sans image ni sondage:")
+            print(f"Texte: {anecdote_text}")
             client_v2.create_tweet(text=anecdote_text)
 
 # Publier les tweets
 keys_to_remove = []
 
-for time, tweets_dict in tweets.items():
+for time, tweets_dict in threads.items():
     try:
         # Supprimer la partie en parenthèses de la chaîne de date
         time_without_parens = time.split(' (')[0]
@@ -82,10 +89,12 @@ for time, tweets_dict in tweets.items():
 
     if tweet_time < now:
         prev_tweet_id = None
-        for index, (tweet_text, image_path) in enumerate(tweets_dict.items()):
+        for index, (tweet_key, tweet_text) in enumerate(tweets_dict.items()):
             unique_tweet_text = f"{tweet_text} - {uuid.uuid4()}"
+            image_path = tweets_dict.get(f"Image{index + 1}", "")
             if index == 0:
                 if tweet_text and image_path:
+                    print(f"Publication du premier tweet avec image: {tweet_text}, Image: {image_path}")
                     media = api_v1.media_upload(image_path)
                     prev_tweet = client_v2.create_tweet(
                         text=unique_tweet_text, media_ids=[media.media_id_string]
@@ -93,15 +102,18 @@ for time, tweets_dict in tweets.items():
                     prev_tweet_id = prev_tweet.data["id"]
                     os.remove(image_path)
                 elif tweet_text:
+                    print(f"Publication du premier tweet sans image: {tweet_text}")
                     prev_tweet = client_v2.create_tweet(text=unique_tweet_text)
                     prev_tweet_id = prev_tweet.data["id"]
                 elif image_path:
+                    print(f"Publication d'une image sans texte: {image_path}")
                     media = api_v1.media_upload(image_path)
                     prev_tweet = client_v2.create_tweet(media_ids=[media.media_id_string])
                     prev_tweet_id = prev_tweet.data["id"]
                     os.remove(image_path)
             else:
                 if tweet_text and image_path:
+                    print(f"Publication d'un tweet de suivi avec image: {tweet_text}, Image: {image_path}")
                     media = api_v1.media_upload(image_path)
                     prev_tweet = client_v2.create_tweet(
                         text=unique_tweet_text,
@@ -111,12 +123,14 @@ for time, tweets_dict in tweets.items():
                     prev_tweet_id = prev_tweet.data["id"]
                     os.remove(image_path)
                 elif tweet_text:
+                    print(f"Publication d'un tweet de suivi sans image: {tweet_text}")
                     prev_tweet = client_v2.create_tweet(
                         text=unique_tweet_text,
                         in_reply_to_tweet_id=prev_tweet_id,
                     )
                     prev_tweet_id = prev_tweet.data["id"]
                 elif image_path:
+                    print(f"Publication d'une image de suivi sans texte: {image_path}")
                     media = api_v1.media_upload(image_path)
                     prev_tweet = client_v2.create_tweet(
                         media_ids=[media.media_id_string],
@@ -128,8 +142,8 @@ for time, tweets_dict in tweets.items():
 
 # Supprimer les clés après l'itération
 for key in keys_to_remove:
-    tweets.pop(key)
+    threads.pop(key)
 
 # Enregistrer les tweets restants dans le fichier JSON
 with open("tweet.json", "w") as file:
-    json.dump(tweets, file)
+    json.dump(threads, file)
