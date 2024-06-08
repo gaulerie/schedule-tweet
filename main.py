@@ -53,9 +53,9 @@ print(json.dumps(threads, indent=4))
 print("Anecdotes reçues :")
 print(json.dumps(anecdotes, indent=4))
 
-# Initialiser le fuseau horaire en UTC pour la comparaison
-now = pendulum.now("UTC")
-print(f"Current time (UTC): {now}")
+# Initialiser le fuseau horaire pour la comparaison
+now = pendulum.now("Europe/Paris")
+print(f"Current time (Europe/Paris): {now}")
 
 # Publier les anecdotes
 if anecdotes:
@@ -67,9 +67,9 @@ if anecdotes:
         duration = anecdote.get("duration", 0)
         poll_options = [choice for choice in choices if choice]
 
-        # Convertir la date de l'anecdote en UTC pour comparaison
-        anecdote_time = pendulum.parse(date, tz="Europe/Paris").in_tz("UTC")
-        print(f"Anecdote time (UTC) : {anecdote_time}")
+        # Convertir la date de l'anecdote en Europe/Paris pour comparaison
+        anecdote_time = pendulum.parse(date, tz="Europe/Paris")
+        print(f"Anecdote time (Europe/Paris) : {anecdote_time}")
 
         if anecdote_time < now:
             if anecdote_text:
@@ -93,9 +93,9 @@ keys_to_remove = []
 for time, tweets_dict in threads.items():
     try:
         print(f"Traitement du thread pour l'heure : {time}")
-        # Convertir l'heure du thread en UTC pour comparaison
-        tweet_time = pendulum.parse(time, tz="Europe/Paris").in_tz("UTC")
-        print(f"Tweet time (UTC) : {tweet_time}, Current time (UTC) : {now}")
+        # Convertir l'heure du thread en Europe/Paris pour comparaison
+        tweet_time = pendulum.parse(time, tz="Europe/Paris")
+        print(f"Tweet time (Europe/Paris) : {tweet_time}, Current time (Europe/Paris) : {now}")
 
         if tweet_time < now:
             print(f"Le thread est prévu pour être publié.")
