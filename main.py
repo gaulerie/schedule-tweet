@@ -59,26 +59,27 @@ now = pendulum.now("Europe/Paris")
 # Publier les anecdotes
 if anecdotes:
     print("Traitement des anecdotes:")
-    anecdote_text = anecdotes.get("text", "")
-    image_url = anecdotes.get("imageUrl", "")
-    choices = anecdotes.get("choices", [])
-    duration = anecdotes.get("duration", 0)
-    poll_options = [{"label": choice} for choice in choices if choice]
-    
-    if anecdote_text:
-        if image_url:
-            print("Publication d'une anecdote avec image:")
-            print(f"Texte: {anecdote_text}, Image URL: {image_url}")
-            media = api_v1.media_upload(image_url)
-            client_v2.create_tweet(text=anecdote_text, media_ids=[media.media_id_string])
-        elif poll_options and duration > 0:
-            print("Publication d'une anecdote avec sondage:")
-            print(f"Texte: {anecdote_text}, Options: {poll_options}, Durée: {duration}")
-            client_v2.create_tweet(text=anecdote_text, poll_options=poll_options, poll_duration_minutes=duration)
-        else:
-            print("Publication d'une anecdote sans image ni sondage:")
-            print(f"Texte: {anecdote_text}")
-            client_v2.create_tweet(text=anecdote_text)
+    for date, anecdote in anecdotes.items():
+        anecdote_text = anecdote.get("text", "")
+        image_url = anecdote.get("imageUrl", "")
+        choices = anecdote.get("choices", [])
+        duration = anecdote.get("duration", 0)
+        poll_options = [{"label": choice} for choice in choices if choice]
+
+        if anecdote_text:
+            if image_url:
+                print("Publication d'une anecdote avec image:")
+                print(f"Texte: {anecdote_text}, Image URL: {image_url}")
+                media = api_v1.media_upload(image_url)
+                client_v2.create_tweet(text=anecdote_text, media_ids=[media.media_id_string])
+            elif poll_options and duration > 0:
+                print("Publication d'une anecdote avec sondage:")
+                print(f"Texte: {anecdote_text}, Options: {poll_options}, Durée: {duration}")
+                client_v2.create_tweet(text=anecdote_text, poll_options=poll_options, poll_duration_minutes=duration)
+            else:
+                print("Publication d'une anecdote sans image ni sondage:")
+                print(f"Texte: {anecdote_text}")
+                client_v2.create_tweet(text=anecdote_text)
 
 # Publier les tweets
 keys_to_remove = []
