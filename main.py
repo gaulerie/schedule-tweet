@@ -46,6 +46,13 @@ except json.JSONDecodeError as e:
     print(e)
     exit(1)
 
+# Afficher les données reçues pour débogage
+print("Threads reçus :")
+print(json.dumps(threads, indent=4))
+
+print("Anecdotes reçues :")
+print(json.dumps(anecdotes, indent=4))
+
 # Initialiser le fuseau horaire
 now = pendulum.now("Europe/Paris")
 
