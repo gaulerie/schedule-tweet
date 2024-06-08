@@ -37,9 +37,6 @@ print(response.text)
 # Tentative de conversion de la réponse en JSON
 try:
     data = response.json()
-    if "Error" in data:
-        print(f"Erreur dans la réponse : {data['Error']}")
-        exit(1)
     tweets = data.get("threads", {})
     anecdote_data = data.get("anecdotes", {})
 except json.JSONDecodeError as e:
