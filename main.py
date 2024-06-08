@@ -37,6 +37,8 @@ print(response.text)
 # Tentative de conversion de la réponse en JSON
 try:
     data = response.json()
+    print("Données JSON récupérées :")
+    print(json.dumps(data, indent=4))  # Afficher les données JSON de manière lisible
     tweets = data.get("threads", {})
     anecdote_data = data.get("anecdotes", {})
 except json.JSONDecodeError as e:
