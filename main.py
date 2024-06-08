@@ -70,6 +70,7 @@ if anecdotes:
         # Convertir la date de l'anecdote en Europe/Paris pour comparaison
         anecdote_time = pendulum.parse(date, tz="Europe/Paris")
         print(f"Anecdote time (Europe/Paris) : {anecdote_time}")
+        print(f"Comparaison anecdote: Anecdote time: {anecdote_time}, Current time: {now}")
 
         if anecdote_time < now:
             if anecdote_text:
@@ -96,6 +97,7 @@ for time, tweets_dict in threads.items():
         # Convertir l'heure du thread en Europe/Paris pour comparaison
         tweet_time = pendulum.parse(time, tz="Europe/Paris")
         print(f"Tweet time (Europe/Paris) : {tweet_time}, Current time (Europe/Paris) : {now}")
+        print(f"Comparaison thread: Tweet time: {tweet_time}, Current time: {now}")
 
         if tweet_time < now:
             print(f"Le thread est prévu pour être publié.")
