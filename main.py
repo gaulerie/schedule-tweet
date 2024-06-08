@@ -89,10 +89,11 @@ for time, tweets_dict in threads.items():
 
     if tweet_time < now:
         prev_tweet_id = None
-        for index, (tweet_key, tweet_text) in enumerate(tweets_dict.items()):
+        for index in range(1, 11):
+            tweet_text = tweets_dict.get(f"Tweet{index}", "")
+            image_path = tweets_dict.get(f"Image{index}", "")
             unique_tweet_text = f"{tweet_text} - {uuid.uuid4()}"
-            image_path = tweets_dict.get(f"Image{index + 1}", "")
-            if index == 0:
+            if index == 1:
                 if tweet_text and image_path:
                     print(f"Publication du premier tweet avec image: {tweet_text}, Image: {image_path}")
                     media = api_v1.media_upload(image_path)
