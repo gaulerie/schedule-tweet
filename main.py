@@ -36,7 +36,9 @@ print(response.text)
 
 # Tentative de conversion de la réponse en JSON
 try:
-    tweets = response.json()
+    data = response.json()
+    tweets = data.get("threads", {})
+    anecdote_data = data.get("anecdotes", {})
 except json.JSONDecodeError as e:
     print("Erreur lors de la conversion de la réponse en JSON :")
     print(e)
@@ -44,6 +46,23 @@ except json.JSONDecodeError as e:
 
 # Initialiser le fuseau horaire
 now = pendulum.now("Europe/Paris")
+
+# Publier les anecdotes
+if anecdote_data:
+    anecdote_text = anecdote_data.get("text", "")
+    image_url = anecdote_data.get("imageUrl", "")
+    choices = anecdote_data.get("choices", [])
+    duration = anecdote_data.get("duration", 0)
+    poll_options = [{"label": choice} for choice in choices if choice]
+    
+    if anecdote_text:
+        if image_url:
+            media = api_v1.media_upload(image_url)
+            client_v2.create_tweet(text=anecdote_text, media_ids=[media.media_id_string])
+        elif poll_options and duration > 0:
+            client_v2.create_tweet(text=anecdote_text, poll_options=poll_options, poll_duration_minutes=duration)
+        else:
+            client_v2.create_tweet(text=anecdote_text)
 
 # Publier les tweets
 keys_to_remove = []
