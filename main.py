@@ -64,7 +64,7 @@ if anecdotes:
         image_url = anecdote.get("imageUrl", "")
         choices = anecdote.get("choices", [])
         duration = anecdote.get("duration", 0)
-        poll_options = [{"label": choice} for choice in choices if choice]
+        poll_options = [choice for choice in choices if choice]
 
         if anecdote_text:
             if image_url:
