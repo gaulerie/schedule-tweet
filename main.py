@@ -54,8 +54,8 @@ print("Anecdotes reçues :")
 print(json.dumps(anecdotes, indent=4))
 
 # Initialiser le fuseau horaire
-now = pendulum.now("Europe/Paris")
-print(f"Current time: {now}")
+now = pendulum.now("UTC")
+print(f"Current time (UTC): {now}")
 
 # Publier les anecdotes
 if anecdotes:
@@ -88,8 +88,8 @@ keys_to_remove = []
 for time, tweets_dict in threads.items():
     try:
         print(f"Traitement du thread pour l'heure : {time}")
-        tweet_time = pendulum.parse(time, tz="Europe/Paris")
-        print(f"Tweet time : {tweet_time}, Current time : {now}")
+        tweet_time = pendulum.parse(time, tz="UTC")
+        print(f"Tweet time (UTC) : {tweet_time}, Current time (UTC) : {now}")
 
         if tweet_time < now:
             print(f"Le thread est prévu pour être publié.")
