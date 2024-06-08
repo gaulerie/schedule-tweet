@@ -86,68 +86,66 @@ keys_to_remove = []
 
 for time, tweets_dict in threads.items():
     try:
-        # Supprimer la partie en parenthèses de la chaîne de date
-        time_without_parens = time.split(' (')[0]
-        # Analyser la chaîne de date et la convertir en un objet pendulum
-        tweet_time = datetime.strptime(time_without_parens, '%a %b %d %Y %H:%M:%S %Z%z')
-        tweet_time = pendulum.instance(tweet_time)
-    except ValueError as e:
-        print(f"Erreur lors de l'analyse de la date : {e}")
-        continue
+        print(f"Traitement du thread pour l'heure : {time}")
+        tweet_time = pendulum.parse(time, tz="Europe/Paris")
+        print(f"Tweet time : {tweet_time}, Current time : {now}")
 
-    if tweet_time < now:
-        prev_tweet_id = None
-        for index in range(1, 11):
-            tweet_text = tweets_dict.get(f"Tweet{index}", "")
-            image_path = tweets_dict.get(f"Image{index}", "")
-            unique_tweet_text = f"{tweet_text} - {uuid.uuid4()}"
-            if index == 1:
-                if tweet_text and image_path:
-                    print(f"Publication du premier tweet avec image: {tweet_text}, Image: {image_path}")
-                    media = api_v1.media_upload(image_path)
-                    prev_tweet = client_v2.create_tweet(
-                        text=unique_tweet_text, media_ids=[media.media_id_string]
-                    )
-                    prev_tweet_id = prev_tweet.data["id"]
-                    os.remove(image_path)
-                elif tweet_text:
-                    print(f"Publication du premier tweet sans image: {tweet_text}")
-                    prev_tweet = client_v2.create_tweet(text=unique_tweet_text)
-                    prev_tweet_id = prev_tweet.data["id"]
-                elif image_path:
-                    print(f"Publication d'une image sans texte: {image_path}")
-                    media = api_v1.media_upload(image_path)
-                    prev_tweet = client_v2.create_tweet(media_ids=[media.media_id_string])
-                    prev_tweet_id = prev_tweet.data["id"]
-                    os.remove(image_path)
-            else:
-                if tweet_text and image_path:
-                    print(f"Publication d'un tweet de suivi avec image: {tweet_text}, Image: {image_path}")
-                    media = api_v1.media_upload(image_path)
-                    prev_tweet = client_v2.create_tweet(
-                        text=unique_tweet_text,
-                        media_ids=[media.media_id_string],
-                        in_reply_to_tweet_id=prev_tweet_id,
-                    )
-                    prev_tweet_id = prev_tweet.data["id"]
-                    os.remove(image_path)
-                elif tweet_text:
-                    print(f"Publication d'un tweet de suivi sans image: {tweet_text}")
-                    prev_tweet = client_v2.create_tweet(
-                        text=unique_tweet_text,
-                        in_reply_to_tweet_id=prev_tweet_id,
-                    )
-                    prev_tweet_id = prev_tweet.data["id"]
-                elif image_path:
-                    print(f"Publication d'une image de suivi sans texte: {image_path}")
-                    media = api_v1.media_upload(image_path)
-                    prev_tweet = client_v2.create_tweet(
-                        media_ids=[media.media_id_string],
-                        in_reply_to_tweet_id=prev_tweet_id,
-                    )
-                    prev_tweet_id = prev_tweet.data["id"]
-                    os.remove(image_path)
-        keys_to_remove.append(time)
+        if tweet_time < now:
+            prev_tweet_id = None
+            for index in range(1, 11):
+                tweet_text = tweets_dict.get(f"Tweet{index}", "")
+                image_path = tweets_dict.get(f"Image{index}", "")
+                unique_tweet_text = f"{tweet_text} - {uuid.uuid4()}"
+                if index == 1:
+                    if tweet_text and image_path:
+                        print(f"Publication du premier tweet avec image: {tweet_text}, Image: {image_path}")
+                        media = api_v1.media_upload(image_path)
+                        prev_tweet = client_v2.create_tweet(
+                            text=unique_tweet_text, media_ids=[media.media_id_string]
+                        )
+                        prev_tweet_id = prev_tweet.data["id"]
+                        os.remove(image_path)
+                    elif tweet_text:
+                        print(f"Publication du premier tweet sans image: {tweet_text}")
+                        prev_tweet = client_v2.create_tweet(text=unique_tweet_text)
+                        prev_tweet_id = prev_tweet.data["id"]
+                    elif image_path:
+                        print(f"Publication d'une image sans texte: {image_path}")
+                        media = api_v1.media_upload(image_path)
+                        prev_tweet = client_v2.create_tweet(media_ids=[media.media_id_string])
+                        prev_tweet_id = prev_tweet.data["id"]
+                        os.remove(image_path)
+                else:
+                    if tweet_text and image_path:
+                        print(f"Publication d'un tweet de suivi avec image: {tweet_text}, Image: {image_path}")
+                        media = api_v1.media_upload(image_path)
+                        prev_tweet = client_v2.create_tweet(
+                            text=unique_tweet_text,
+                            media_ids=[media.media_id_string],
+                            in_reply_to_tweet_id=prev_tweet_id,
+                        )
+                        prev_tweet_id = prev_tweet.data["id"]
+                        os.remove(image_path)
+                    elif tweet_text:
+                        print(f"Publication d'un tweet de suivi sans image: {tweet_text}")
+                        prev_tweet = client_v2.create_tweet(
+                            text=unique_tweet_text,
+                            in_reply_to_tweet_id=prev_tweet_id,
+                        )
+                        prev_tweet_id = prev_tweet.data["id"]
+                    elif image_path:
+                        print(f"Publication d'une image de suivi sans texte: {image_path}")
+                        media = api_v1.media_upload(image_path)
+                        prev_tweet = client_v2.create_tweet(
+                            media_ids=[media.media_id_string],
+                            in_reply_to_tweet_id=prev_tweet_id,
+                        )
+                        prev_tweet_id = prev_tweet.data["id"]
+                        os.remove(image_path)
+            keys_to_remove.append(time)
+
+    except Exception as e:
+        print(f"Erreur lors du traitement du thread à l'heure {time} : {e}")
 
 # Supprimer les clés après l'itération
 for key in keys_to_remove:
