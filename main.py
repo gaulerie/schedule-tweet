@@ -44,6 +44,10 @@ now = pendulum.now("Europe/Paris")
 
 # Fonction pour télécharger l'image et retourner le chemin du fichier temporaire
 def download_image(image_url):
+    image_url = image_url.strip()  # Enlever les espaces en trop
+    if not image_url.startswith("http"):
+        print(f"URL invalide : {image_url}")
+        return None
     response = requests.get(image_url)
     if response.status_code == 200:
         temp_file = tempfile.NamedTemporaryFile(delete=False)
