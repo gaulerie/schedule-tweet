@@ -44,10 +44,6 @@ now = pendulum.now("Europe/Paris")
 
 # Fonction pour télécharger l'image et retourner le chemin du fichier temporaire
 def download_image(image_url):
-    image_url = image_url.strip()  # Enlever les espaces en trop
-    if not image_url.startswith("http"):
-        print(f"URL invalide : {image_url}")
-        return None
     try:
         response = requests.get(image_url)
         response.raise_for_status()
@@ -56,7 +52,7 @@ def download_image(image_url):
         temp_file.close()
         return temp_file.name
     except requests.exceptions.RequestException as e:
-        print(f"Erreur lors du téléchargement de l'image : {e}")
+        print(f"Erreur lors du téléchargement de l'image : {e}, URL: {image_url}")
         return None
 
 # Publier les anecdotes
@@ -76,9 +72,6 @@ if anecdotes:
             elif anecdote_text:
                 media_ids = []
                 for image_url in image_urls:
-                    image_url = image_url.strip()  # Assurez-vous qu'il n'y a pas d'espaces
-                    if not image_url:
-                        continue
                     image_path = download_image(image_url)
                     if image_path:
                         media = api_v1.media_upload(image_path)
@@ -105,9 +98,6 @@ for time, tweets_dict in threads.items():
                 media_ids = []
 
                 for image_url in image_urls:
-                    image_url = image_url.strip()  # Assurez-vous qu'il n'y a pas d'espaces
-                    if not image_url:
-                        continue
                     image_path = download_image(image_url)
                     if image_path:
                         media = api_v1.media_upload(image_path)
