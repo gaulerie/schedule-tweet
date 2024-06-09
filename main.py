@@ -76,6 +76,8 @@ if anecdotes:
             elif anecdote_text:
                 media_ids = []
                 for image_url in image_urls:
+                    if not image_url.strip():
+                        continue
                     image_path = download_image(image_url)
                     if image_path:
                         media = api_v1.media_upload(image_path)
@@ -102,6 +104,8 @@ for time, tweets_dict in threads.items():
                 media_ids = []
 
                 for image_url in image_urls:
+                    if not image_url.strip():
+                        continue
                     image_path = download_image(image_url)
                     if image_path:
                         media = api_v1.media_upload(image_path)
