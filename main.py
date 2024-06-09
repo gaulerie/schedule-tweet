@@ -12,7 +12,7 @@ access_token = os.environ.get("TWITTER_ACCESS_TOKEN")
 access_token_secret = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret_key)
-auth.set_access_token(access_token, access_token_secret)
+auth.setAccessToken(access_token, access_token_secret)
 api_v1 = tweepy.API(auth)
 
 # Configurer l'API v2 pour la publication de tweets
