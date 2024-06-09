@@ -3,6 +3,7 @@ import json
 import tweepy
 import pendulum
 import requests
+import tempfile
 
 # Configurer l'API v1.1 pour le téléchargement de médias
 consumer_key = os.environ.get("TWITTER_CONSUMER_KEY")
@@ -41,6 +42,18 @@ except json.JSONDecodeError as e:
 # Initialiser le fuseau horaire pour la comparaison
 now = pendulum.now("Europe/Paris")
 
+# Fonction pour télécharger l'image et retourner le chemin du fichier temporaire
+def download_image(image_url):
+    response = requests.get(image_url)
+    if response.status_code == 200:
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        temp_file.write(response.content)
+        temp_file.close()
+        return temp_file.name
+    else:
+        print(f"Erreur lors du téléchargement de l'image : {image_url}")
+        return None
+
 # Publier les anecdotes
 if anecdotes:
     for date, anecdote in anecdotes.items():
@@ -56,8 +69,11 @@ if anecdotes:
             if anecdote_text:
                 media_ids = []
                 for image_url in image_urls:
-                    media = api_v1.media_upload(image_url)
-                    media_ids.append(media.media_id_string)
+                    image_path = download_image(image_url)
+                    if image_path:
+                        media = api_v1.media_upload(image_path)
+                        media_ids.append(media.media_id_string)
+                        os.remove(image_path)
 
                 if media_ids:
                     client_v2.create_tweet(text=anecdote_text, media_ids=media_ids)
@@ -77,13 +93,15 @@ for time, tweets_dict in threads.items():
             prev_tweet_id = None
             for index in range(1, 11):
                 tweet_text = tweets_dict.get(f"Tweet{index}", "")
-                image_paths = tweets_dict.get(f"Image{index}", [])
+                image_urls = tweets_dict.get(f"Image{index}", [])
                 media_ids = []
 
-                for image_path in image_paths:
+                for image_url in image_urls:
+                    image_path = download_image(image_url)
                     if image_path:
                         media = api_v1.media_upload(image_path)
                         media_ids.append(media.media_id_string)
+                        os.remove(image_path)
 
                 if index == 1:
                     if tweet_text:
