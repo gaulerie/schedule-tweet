@@ -45,7 +45,7 @@ now = pendulum.now("Europe/Paris")
 # Fonction pour télécharger l'image et retourner le chemin du fichier temporaire
 def download_image(image_url):
     try:
-        response = requests.get(image_url)
+        response = requests.get(image_url.strip())
         response.raise_for_status()
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         temp_file.write(response.content)
@@ -72,11 +72,12 @@ if anecdotes:
             elif anecdote_text:
                 media_ids = []
                 for image_url in image_urls:
-                    image_path = download_image(image_url.strip())
-                    if image_path:
-                        media = api_v1.media_upload(image_path)
-                        media_ids.append(media.media_id_string)
-                        os.remove(image_path)
+                    if image_url.strip():
+                        image_path = download_image(image_url.strip())
+                        if image_path:
+                            media = api_v1.media_upload(image_path)
+                            media_ids.append(media.media_id_string)
+                            os.remove(image_path)
 
                 if media_ids:
                     client_v2.create_tweet(text=anecdote_text, media_ids=media_ids)
@@ -98,11 +99,12 @@ for time, tweets_dict in threads.items():
                 media_ids = []
 
                 for image_url in image_urls:
-                    image_path = download_image(image_url.strip())
-                    if image_path:
-                        media = api_v1.media_upload(image_path)
-                        media_ids.append(media.media_id_string)
-                        os.remove(image_path)
+                    if image_url.strip():
+                        image_path = download_image(image_url.strip())
+                        if image_path:
+                            media = api_v1.media_upload(image_path)
+                            media_ids.append(media.media_id_string)
+                            os.remove(image_path)
 
                 if index == 1:
                     if tweet_text:
