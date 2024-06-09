@@ -48,14 +48,15 @@ def download_image(image_url):
     if not image_url.startswith("http"):
         print(f"URL invalide : {image_url}")
         return None
-    response = requests.get(image_url)
-    if response.status_code == 200:
+    try:
+        response = requests.get(image_url)
+        response.raise_for_status()
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         temp_file.write(response.content)
         temp_file.close()
         return temp_file.name
-    else:
-        print(f"Erreur lors du téléchargement de l'image : {image_url}")
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur lors du téléchargement de l'image : {e}")
         return None
 
 # Publier les anecdotes
@@ -70,7 +71,9 @@ if anecdotes:
         anecdote_time = pendulum.parse(date).in_tz("Europe/Paris")
 
         if anecdote_time < now:
-            if anecdote_text:
+            if poll_options and duration > 0:
+                client_v2.create_tweet(text=anecdote_text, poll_options=poll_options, poll_duration_minutes=duration)
+            elif anecdote_text:
                 media_ids = []
                 for image_url in image_urls:
                     image_path = download_image(image_url)
@@ -81,8 +84,6 @@ if anecdotes:
 
                 if media_ids:
                     client_v2.create_tweet(text=anecdote_text, media_ids=media_ids)
-                elif poll_options and duration > 0:
-                    client_v2.create_tweet(text=anecdote_text, poll_options=poll_options, poll_duration_minutes=duration)
                 else:
                     client_v2.create_tweet(text=anecdote_text)
 
@@ -121,7 +122,9 @@ for time, tweets_dict in threads.items():
                     elif media_ids:
                         prev_tweet = client_v2.create_tweet(media_ids=media_ids, in_reply_to_tweet_id=prev_tweet_id)
                         prev_tweet_id = prev_tweet.data["id"]
+
             keys_to_remove.append(time)
+
     except Exception as e:
         print(f"Erreur lors du traitement du thread à l'heure {time} : {e}")
 
