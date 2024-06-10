@@ -24,8 +24,11 @@ function doGet() {
       var row = dataThreads[i];
       try {
         var date = new Date(row[0]);
-        Logger.log('Date processed: ' + date.toISOString());
-        if (!row[22]) {  // Vérifie si la colonne "tweeté" n'est pas true (index 22)
+        Logger.log('Thread date processed: ' + date.toISOString());
+        Logger.log('Thread tweeté column value: ' + row[21]); // Adjusted column index to 21 for zero-based index
+
+        // Check for the correct column index and the "tweeté" status
+        if (row[21] !== undefined && row[21].toString().toLowerCase() !== 'true') {
           var thread = {};
           for (var j = 1; j <= 20; j += 2) {
             if (row[j]) {
@@ -36,7 +39,6 @@ function doGet() {
             }
           }
           jsonThreads[date.toISOString()] = thread;
-          markAsTweeted(sheetThreads, i);
         }
       } catch (e) {
         Logger.log(e.message);
@@ -51,8 +53,9 @@ function doGet() {
       var rowA = dataAnecdotes[j];
       try {
         var dateA = new Date(rowA[0]);
-        Logger.log('DateA processed: ' + dateA.toISOString());
-        if (!rowA[8]) {  // Vérifie si la colonne "tweeté" n'est pas true (index 8)
+        Logger.log('Anecdote date processed: ' + dateA.toISOString());
+        Logger.log('Anecdote tweeté column value: ' + rowA[8]);
+        if (rowA[8] !== undefined && rowA[8].toString().toLowerCase() !== 'true') {  // Vérifie si la colonne "tweeté" n'est pas true (index 8)
           var anecdote = {
             "text": rowA[1],
             "imageUrls": rowA[2] ? rowA[2].split(",") : [],
@@ -65,7 +68,6 @@ function doGet() {
             "duration": rowA[7]
           };
           jsonAnecdotes[dateA.toISOString()] = anecdote;
-          markAsTweeted(sheetAnecdotes, j);
         }
       } catch (e) {
         Logger.log(e.message);
