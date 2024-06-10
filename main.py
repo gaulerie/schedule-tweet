@@ -143,6 +143,9 @@ for rowIndex, (time, tweets_dict) in enumerate(threads.items(), start=1):
             for index in range(1, 11):
                 tweet_text = tweets_dict.get(f"Tweet{index}", "").strip()
                 image_urls = [url.strip() for url in tweets_dict.get(f"Image{index}", [])]
+                # Fix the URLs that might be incorrectly split
+                image_urls = [url for url in image_urls if url.startswith('http')]
+
                 media_ids = []
 
                 for image_url in image_urls:
