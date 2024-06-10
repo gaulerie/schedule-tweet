@@ -20,7 +20,7 @@ bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
 client_v2 = tweepy.Client(bearer_token, consumer_key, consumer_secret_key, access_token, access_token_secret)
 
 # Récupérer les données depuis le déploiement Google Apps Script
-url = "https://script.google.com/macros/s/AKfycbw4n_ss2sDYIh4ZFYak9ygVQygpZWumt5fQHxuehkJVsOp1uG1q3a-Nyy44__4tOhX6/exec"
+url = "https://script.google.com/macros/s/AKfycbymJdJ2uVKAH_tlIh5D2H8OkNu_lR8wA4CeMfFoe5AoM265LMEDUWsvwZpyH5GyPPFu/exec"
 response = requests.get(url)
 
 # Vérification du statut de la réponse
@@ -71,7 +71,7 @@ def download_image(image_url):
 
 # Fonction pour marquer les entrées comme tweeté
 def mark_as_tweeted(thread_updates, anecdote_updates):
-    update_url = "https://script.google.com/macros/s/AKfycbw4n_ss2sDYIh4ZFYak9ygVQygpZWumt5fQHxuehkJVsOp1uG1q3a-Nyy44__4tOhX6/exec"
+    update_url = "https://script.google.com/macros/s/AKfycbymJdJ2uVKAH_tlIh5D2H8OkNu_lR8wA4CeMfFoe5AoM265LMEDUWsvwZpyH5GyPPFu/exec"
     data = {
         "threads": thread_updates,
         "anecdotes": anecdote_updates
