@@ -23,7 +23,7 @@ This repository contains a script to schedule and publish tweets using data from
 
     ```bash
     git clone https://github.com/gaulerie/schedule-tweet.git
-    cd tweet-scheduler
+    cd schedule-tweet
     ```
 
 2. **Install dependencies:**
