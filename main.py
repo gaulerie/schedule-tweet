@@ -89,11 +89,15 @@ anecdote_updates = []
 if anecdotes:
     print("Traitement des anecdotes:")
     for rowIndex, (date, anecdote) in enumerate(anecdotes.items(), start=1):
-        anecdote_text = anecdote.get("text", "")
-        image_urls = anecdote.get("imageUrls", [])
-        choices = anecdote.get("choices", [])
+        anecdote_text = anecdote.get("text", "").strip()
+        image_urls = anecdote.get("imageUrl", "").strip().split(", ")
+        choices = [choice for choice in anecdote.get("choices", []) if choice.strip()]
         duration = anecdote.get("duration", 0)
-        poll_options = [choice for choice in choices if choice]
+
+        # Vérifier que l'anecdote a un texte ou des images valides avant de la publier
+        if not anecdote_text and not image_urls:
+            print("Aucune anecdote valide trouvée.")
+            continue
 
         # Convertir la date de l'anecdote en Europe/Paris pour comparaison
         anecdote_time = pendulum.parse(date).in_tz("Europe/Paris")
@@ -110,12 +114,12 @@ if anecdotes:
                             media = api_v1.media_upload(image_path)
                             media_ids.append(media.media_id_string)
                             os.remove(image_path)
-                if media_ids and not (poll_options and duration > 0):
+                if media_ids and not (choices and duration > 0):
                     print(f"Publication d'une anecdote avec images: {anecdote_text}, Images: {image_urls}")
                     client_v2.create_tweet(text=anecdote_text, media_ids=media_ids)
-                elif poll_options and duration > 0:
-                    print(f"Publication d'une anecdote avec sondage: {anecdote_text}, Options: {poll_options}, Durée: {duration}")
-                    client_v2.create_tweet(text=anecdote_text, poll_options=poll_options, poll_duration_minutes=duration)
+                elif choices and duration > 0:
+                    print(f"Publication d'une anecdote avec sondage: {anecdote_text}, Options: {choices}, Durée: {duration}")
+                    client_v2.create_tweet(text=anecdote_text, poll_options=choices, poll_duration_minutes=duration)
                 else:
                     print(f"Publication d'une anecdote sans image ni sondage: {anecdote_text}")
                     client_v2.create_tweet(text=anecdote_text)
@@ -137,8 +141,8 @@ for rowIndex, (time, tweets_dict) in enumerate(threads.items(), start=1):
             print(f"Le thread est prévu pour être publié.")
             prev_tweet_id = None
             for index in range(1, 11):
-                tweet_text = tweets_dict.get(f"Tweet{index}", "")
-                image_urls = tweets_dict.get(f"Image{index}", "").split(", ")
+                tweet_text = tweets_dict.get(f"Tweet{index}", "").strip()
+                image_urls = tweets_dict.get(f"Image{index}", "").strip().split(", ")
                 media_ids = []
 
                 for image_url in image_urls:
