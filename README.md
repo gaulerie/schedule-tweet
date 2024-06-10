@@ -1,37 +1,129 @@
-<center><h1> 🗓️ Schedule-Tweet</h1>
 
-[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
-<h3>Schedule tweet and thread using github action 🚀🚀🚀</h3></center>
-<hr>
+# Tweet Scheduler 🐦
 
-## Introduction
-Schedule tweet and thread as many as you want. This script will check if schedule time is already past. if yes, it will post that tweet/threat and will delete it from tweet.json file. If any image is used that image also will be deleted automatically from images folder. (images folder should always have at least 1 photo or folder will be deleted automatically.)
+This repository contains a script to schedule and publish tweets using data from a Google Apps Script deployment. The script fetches anecdotes and threads, processes them, and publishes them on Twitter at scheduled times. Additionally, it handles images and polls for anecdotes.
 
-## Usage
+## Features ✨
 
-- Fork this repo.
-- Get a twitter developer account and create an app.
-- Go to repo settings > Secrets > Actions.
-- Save the API key as TWITTER_CONSUMER_KEY
-- Save the API secret as TWITTER_CONSUMER_SECRET_KEY
-- Save the access token as TWITTER_ACCESS_TOKEN
-- Save the access token secret as TWITTER_ACCESS_TOKEN_SECRET
+- Fetch data from a Google Apps Script deployment.
+- Schedule and publish tweets using Tweepy.
+- Handle images and polls for tweets.
+- Use GitHub Actions to automate the process.
 
-- Edit tweet.json.
-	- Check sample_tweet_and_thread.json for learning how to format.
-	- Either text or image can be omitted for any post as exemplified in sample_tweet_and_thread.json.
-	- Image size can't be more than 5 MB
-	- Line breaks can be inserted in the tweet with the escape sequeence \n.
-- Now, your tweeting workflow is ready. You can manually trigger it...
-- Or set a run schedule for it to follow.
-	- Go to line 8 and 9 of .github/workflows/main.yml. Delete the # symbol at the start of the line and set your run frequency of choice.
+## Repository Structure 📂
 
-#### Important !!!
-Time Zone used in this script is Asia/Dhaka (UTC/GMT +6).
-You can change Time Zone from main.py on lines number 18 and 22 
+- `requirements.txt`: Lists the dependencies required for the project.
+- `tweet.json`: Stores the tweets data.
+- `main.py`: The main script to schedule and publish tweets.
+- `.github/workflows/main.yml`: The GitHub Actions workflow file.
 
-#### Give a Star ⭐ it helps you.
+## Setup 🛠️
 
-## Contributing
+1. **Clone the repository:**
 
-Contributions are always welcome!
+    ```bash
+    git clone https://github.com/your-username/tweet-scheduler.git
+    cd tweet-scheduler
+    ```
+
+2. **Install dependencies:**
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. **Set up environment variables:**
+
+    Create a `.env` file with the following content:
+
+    ```env
+    TWITTER_CONSUMER_KEY=your_consumer_key
+    TWITTER_CONSUMER_SECRET_KEY=your_consumer_secret_key
+    TWITTER_ACCESS_TOKEN=your_access_token
+    TWITTER_ACCESS_TOKEN_SECRET=your_access_token_secret
+    TWITTER_BEARER_TOKEN=your_bearer_token
+    ```
+
+4. **Update the URL for the Google Apps Script deployment:**
+
+    In `main.py`, update the `url` variable with your deployment URL.
+
+    ```python
+    url = "https://script.google.com/macros/s/your-deployment-url/exec"
+    ```
+
+## Running the Script 🚀
+
+You can run the script manually by executing:
+
+```bash
+python main.py
+```
+
+## GitHub Actions Workflow ⚙️
+
+The GitHub Actions workflow is defined in `.github/workflows/main.yml`. It automates the process of checking for updates and publishing tweets.
+
+### Workflow Steps:
+
+1. **Checkout the repository:**
+
+    ```yaml
+    - uses: actions/checkout@v3
+    ```
+
+2. **Install dependencies:**
+
+    ```yaml
+    - name: Install dependency
+      run: python -m pip install tweepy pendulum requests
+    ```
+
+3. **Run the script:**
+
+    ```yaml
+    - name: Run script
+      env:
+        TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
+        TWITTER_CONSUMER_SECRET_KEY: ${{ secrets.TWITTER_CONSUMER_SECRET_KEY }}
+        TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+        TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+        TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+      run: python main.py
+    ```
+
+4. **Verify changed files:**
+
+    ```yaml
+    - name: Verify Changed files
+      uses: tj-actions/verify-changed-files@v10
+      id: verify-changed-files
+      with:
+        files: |
+          tweet.json
+          **/*.jpeg
+          **/*.jpg
+          **/*.png
+          **/*.gif
+    ```
+
+5. **Commit and push changes:**
+
+    ```yaml
+    - name: Commit and Push only when files change.
+      if: steps.verify-changed-files.outputs.files_changed == 'true'
+      run: |
+        git config --global user.name 'Automated Publisher'
+        git config --global user.email 'actions@users.noreply.github.com'
+        git add -A
+        git commit -am "Future tweet"
+        git push
+    ```
+
+## License 📄
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Contributing 🤝
+
+Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
