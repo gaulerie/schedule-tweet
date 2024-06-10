@@ -105,8 +105,8 @@ if anecdotes:
         print(f"Comparaison anecdote: Anecdote time: {anecdote_time}, Current time: {now}")
 
         if anecdote_time < now:
-            if anecdote_text:
-                media_ids = []
+            media_ids = []
+            if anecdote_text or image_urls:
                 for image_url in image_urls:
                     if image_url:
                         image_path = download_image(image_url)
@@ -120,7 +120,7 @@ if anecdotes:
                 elif choices and duration > 0:
                     print(f"Publication d'une anecdote avec sondage: {anecdote_text}, Options: {choices}, Durée: {duration}")
                     client_v2.create_tweet(text=anecdote_text, poll_options=choices, poll_duration_minutes=duration)
-                else:
+                elif anecdote_text:
                     print(f"Publication d'une anecdote sans image ni sondage: {anecdote_text}")
                     client_v2.create_tweet(text=anecdote_text)
                 anecdote_updates.append({"rowIndex": rowIndex})
