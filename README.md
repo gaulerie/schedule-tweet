@@ -22,7 +22,7 @@ This repository contains a script to schedule and publish tweets using data from
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/your-username/tweet-scheduler.git
+    git clone https://github.com/gaulerie/schedule-tweet.git
     cd tweet-scheduler
     ```
 
@@ -34,7 +34,7 @@ This repository contains a script to schedule and publish tweets using data from
 
 3. **Set up environment variables:**
 
-    Create a `.env` file with the following content:
+    Create a `.env` file with the following content (on GitHub, create Secrets) :
 
     ```env
     TWITTER_CONSUMER_KEY=your_consumer_key
