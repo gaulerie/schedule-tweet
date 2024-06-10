@@ -90,7 +90,7 @@ if anecdotes:
     print("Traitement des anecdotes:")
     for rowIndex, (date, anecdote) in enumerate(anecdotes.items(), start=1):
         anecdote_text = anecdote.get("text", "").strip()
-        image_urls = anecdote.get("imageUrl", "").strip().split(", ")
+        image_urls = anecdote.get("imageUrls", "").strip().split(", ")
         choices = [choice for choice in anecdote.get("choices", []) if choice.strip()]
         duration = anecdote.get("duration", 0)
 
