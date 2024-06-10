@@ -20,7 +20,7 @@ bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
 client_v2 = tweepy.Client(bearer_token, consumer_key, consumer_secret_key, access_token, access_token_secret)
 
 # Récupérer les données depuis le déploiement Google Apps Script
-url = "https://script.google.com/macros/s/AKfycbxsMMZ9NUfqzRtuaiNzpiYB1V45XgzTBRCCk9kbDAo-ZydZGcQLf3ANrujn0pY_KJBn/exec"
+url = "https://script.google.com/macros/s/AKfycbw4n_ss2sDYIh4ZFYak9ygVQygpZWumt5fQHxuehkJVsOp1uG1q3a-Nyy44__4tOhX6/exec"
 response = requests.get(url)
 
 # Vérification du statut de la réponse
