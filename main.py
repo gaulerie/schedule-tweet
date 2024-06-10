@@ -69,12 +69,28 @@ def download_image(image_url):
         print(f"Erreur lors du téléchargement de l'image : {e}")
         return None
 
+# Fonction pour marquer les entrées comme tweeté
+def mark_as_tweeted(thread_updates, anecdote_updates):
+    update_url = "https://script.google.com/macros/s/AKfycbxsMMZ9NUfqzRtuaiNzpiYB1V45XgzTBRCCk9kbDAo-ZydZGcQLf3ANrujn0pY_KJBn/exec"
+    data = {
+        "threads": thread_updates,
+        "anecdotes": anecdote_updates
+    }
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(update_url, data=json.dumps(data), headers=headers)
+    if response.status_code != 200:
+        print(f"Erreur lors de la mise à jour des données : {response.status_code}")
+        print(response.text)
+    else:
+        print("Données mises à jour avec succès")
+
 # Publier les anecdotes
+anecdote_updates = []
 if anecdotes:
     print("Traitement des anecdotes:")
-    for date, anecdote in anecdotes.items():
+    for rowIndex, (date, anecdote) in enumerate(anecdotes.items(), start=1):
         anecdote_text = anecdote.get("text", "")
-        image_urls = anecdote.get("imageUrl", "").split(", ")
+        image_urls = anecdote.get("imageUrls", [])
         choices = anecdote.get("choices", [])
         duration = anecdote.get("duration", 0)
         poll_options = [choice for choice in choices if choice]
@@ -103,11 +119,13 @@ if anecdotes:
                 else:
                     print(f"Publication d'une anecdote sans image ni sondage: {anecdote_text}")
                     client_v2.create_tweet(text=anecdote_text)
+                anecdote_updates.append({"rowIndex": rowIndex})
 
-# Publier les tweets
+# Publier les threads
+thread_updates = []
 keys_to_remove = []
 
-for time, tweets_dict in threads.items():
+for rowIndex, (time, tweets_dict) in enumerate(threads.items(), start=1):
     try:
         print(f"Traitement du thread pour l'heure : {time}")
         # Convertir l'heure du thread en Europe/Paris pour comparaison
@@ -151,6 +169,7 @@ for time, tweets_dict in threads.items():
                         prev_tweet_id = prev_tweet.data["id"]
 
             keys_to_remove.append(time)
+            thread_updates.append({"rowIndex": rowIndex})
         else:
             print(f"Le thread n'est pas encore prévu pour être publié.")
     except Exception as e:
@@ -163,3 +182,6 @@ for key in keys_to_remove:
 # Enregistrer les tweets restants dans le fichier JSON
 with open("tweet.json", "w") as file:
     json.dump(threads, file)
+
+# Marquer les tweets et anecdotes comme tweeté
+mark_as_tweeted(thread_updates, anecdote_updates)
