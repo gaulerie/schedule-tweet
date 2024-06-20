@@ -19,11 +19,43 @@ function doGet() {
     var jsonThreads = {};
     var jsonAnecdotes = {};
 
+    // Custom date parsing function for French date format
+    function parseFrenchDate(dateStr) {
+      dateStr = dateStr.toString().trim(); // Ensure dateStr is a string and trim whitespace
+      Logger.log('Parsing date string: ' + dateStr);
+      
+      if (dateStr.match(/[a-zA-Z]{3} [a-zA-Z]{3} \d{2} \d{4} \d{2}:\d{2}:\d{2} GMT\+\d{4} \([a-zA-Z ]+\)/)) {
+        // If the date is in standard JavaScript format, directly parse it
+        return new Date(dateStr);
+      } else {
+        // Parse the French date format
+        var months = {
+          "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5,
+          "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11
+        };
+        var parts = dateStr.split(/[ ,:]+/);
+        Logger.log('Date parts: ' + JSON.stringify(parts));
+        if (parts.length !== 6) {
+          throw new Error('Invalid date format');
+        }
+        var day = parseInt(parts[0]);
+        var month = months[parts[1].toLowerCase()];
+        if (month === undefined) {
+          throw new Error('Invalid month value');
+        }
+        var year = parseInt(parts[2]);
+        var hour = parseInt(parts[3]);
+        var minute = parseInt(parts[4]);
+        var second = parseInt(parts[5]);
+        return new Date(year, month, day, hour, minute, second);
+      }
+    }
+
     // Process threads
     for (var i = 1; i < dataThreads.length; i++) {
       var row = dataThreads[i];
       try {
-        var date = new Date(row[0]);
+        var date = parseFrenchDate(row[0]);
         Logger.log('Thread date processed: ' + date.toISOString());
         Logger.log('Thread tweeté column value: ' + row[21]); // Adjusted column index to 21 for zero-based index
 
@@ -41,7 +73,7 @@ function doGet() {
           jsonThreads[date.toISOString()] = thread;
         }
       } catch (e) {
-        Logger.log(e.message);
+        Logger.log('Error processing thread row ' + i + ': ' + e.message);
       }
     }
 
@@ -52,7 +84,7 @@ function doGet() {
     for (var j = 1; j < dataAnecdotes.length; j++) {
       var rowA = dataAnecdotes[j];
       try {
-        var dateA = new Date(rowA[0]);
+        var dateA = parseFrenchDate(rowA[0]);
         Logger.log('Anecdote date processed: ' + dateA.toISOString());
         Logger.log('Anecdote tweeté column value: ' + rowA[8]);
         if (rowA[8] !== undefined && rowA[8].toString().toLowerCase() !== 'true') {  // Vérifie si la colonne "tweeté" n'est pas true (index 8)
@@ -70,7 +102,7 @@ function doGet() {
           jsonAnecdotes[dateA.toISOString()] = anecdote;
         }
       } catch (e) {
-        Logger.log(e.message);
+        Logger.log('Error processing anecdote row ' + j + ': ' + e.message);
       }
     }
 
@@ -93,8 +125,21 @@ function doGet() {
   }
 }
 
-function markAsTweeted(sheet, rowIndex) {
-  sheet.getRange(rowIndex + 1, sheet.getLastColumn()).setValue(true); // Assumes 'tweeté' is the last column
+function getColumnIndex(sheet, columnName) {
+  var data = sheet.getDataRange().getValues();
+  var headerRow = data[0];
+  for (var i = 0; i < headerRow.length; i++) {
+    if (headerRow[i].toString().toLowerCase() === columnName.toLowerCase()) {
+      Logger.log("Column '" + columnName + "' found at index " + i);
+      return i;
+    }
+  }
+  throw new Error("Column '" + columnName + "' not found");
+}
+
+function markAsTweeted(sheet, rowIndex, columnIndex) {
+  Logger.log("Marking row " + (rowIndex + 1) + ", column " + (columnIndex + 1) + " as TRUE");
+  sheet.getRange(rowIndex + 1, columnIndex + 1).setValue(true); // Set 'tweeté' to TRUE
 }
 
 function doPost(e) {
@@ -113,19 +158,24 @@ function doPost(e) {
 
     var threadUpdates = params.threads;
     var anecdoteUpdates = params.anecdotes;
+    
+    var tweetColumnIndexThreads = getColumnIndex(sheetThreads, 'tweeté');
+    var tweetColumnIndexAnecdotes = getColumnIndex(sheetAnecdotes, 'tweeté');
 
     // Update threads
     for (var i = 0; i < threadUpdates.length; i++) {
       var thread = threadUpdates[i];
       var rowIndex = thread.rowIndex;
-      markAsTweeted(sheetThreads, rowIndex);
+      Logger.log("Updating thread at row index " + rowIndex);
+      markAsTweeted(sheetThreads, rowIndex, tweetColumnIndexThreads);
     }
 
     // Update anecdotes
     for (var j = 0; j < anecdoteUpdates.length; j++) {
       var anecdote = anecdoteUpdates[j];
       var rowIndex = anecdote.rowIndex;
-      markAsTweeted(sheetAnecdotes, rowIndex);
+      Logger.log("Updating anecdote at row index " + rowIndex);
+      markAsTweeted(sheetAnecdotes, rowIndex, tweetColumnIndexAnecdotes);
     }
 
     return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);

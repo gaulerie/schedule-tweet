@@ -3,7 +3,7 @@ var GITHUB_TOKEN = '...';  // Remplacez par votre token d'accès personnel GitHu
 var GITHUB_BRANCH = 'main';  // Remplacez par la branche de votre dépôt GitHub
 
 function updateSheetFromDoc() {
-  var docId = '1GoLqa45kjE_LbHKDWrPgDEvSiNpyS0PrpZ2NlVti_P0';  // Remplacez par l'ID de votre Google Docs
+  var docId = '...';  // Remplacez par l'ID de votre Google Docs
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Threads');  // Remplacez 'Threads' par le nom de votre feuille Google Sheets
   var doc = DocumentApp.openById(docId);
   var body = doc.getBody();
@@ -89,16 +89,51 @@ function updateSheetFromDoc() {
     threadData.push(currentThreadData);
   }
 
-  for (var row = 3; row < threadData.length + 3; row++) {  // Commencez à la ligne 3
-    var thread = threadData[row - 3];
+  // Get existing data to check for duplicates
+  var existingData = sheet.getDataRange().getValues();
+
+  for (var row = 0; row < threadData.length; row++) {
+    var thread = threadData[row];
     var rowData = [formatDate(thread.date)];
     Logger.log('Formatted date: ' + rowData[0]);
     for (var t = 0; t < 10; t++) {
       rowData.push(thread.tweets[t] || '');
       rowData.push(thread.images[t] || '');
     }
-    sheet.getRange(row, 1, 1, rowData.length).setValues([rowData]);
+
+    // Check if the row already exists
+    if (!isDuplicateRow(existingData, rowData)) {
+      var firstEmptyRow = findFirstEmptyRow(sheet);
+      sheet.getRange(firstEmptyRow, 1, 1, rowData.length).setValues([rowData]);
+      existingData.push(rowData);  // Add the new row data to existingData to keep track of it
+    } else {
+      Logger.log('Duplicate row found, dismissing: ' + JSON.stringify(rowData));
+    }
   }
+}
+
+function findFirstEmptyRow(sheet) {
+  var data = sheet.getDataRange().getValues();
+  for (var i = 0; i < data.length; i++) {
+    if (!data[i][0]) {
+      return i + 1;
+    }
+  }
+  return data.length + 1;
+}
+
+function isDuplicateRow(existingData, newRowData) {
+  for (var i = 0; i < existingData.length; i++) {
+    var existingRow = existingData[i];
+    if (existingRow[0] === newRowData[0]) {  // Check if dates are the same
+      for (var j = 1; j < existingRow.length; j++) {
+        if (existingRow[j] && newRowData[j] && existingRow[j] === newRowData[j]) {  // Check if any tweet or image matches
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 function uploadImageToGithub(blob, fileName) {
