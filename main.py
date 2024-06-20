@@ -88,7 +88,7 @@ def mark_as_tweeted(thread_updates, anecdote_updates):
 anecdote_updates = []
 if anecdotes:
     print("Traitement des anecdotes:")
-    for rowIndex, (date, anecdote) in enumerate(anecdotes.items(), start=1):
+    for rowIndex, (date, anecdote) in enumerate(anecdotes.items(), start=2):  # Adjusting to start from row 2
         anecdote_text = anecdote.get("text", "").strip()
         image_urls = [url.strip() for url in anecdote.get("imageUrls", [])]
         choices = [choice for choice in anecdote.get("choices", []) if choice.strip()]
@@ -129,7 +129,7 @@ if anecdotes:
 thread_updates = []
 keys_to_remove = []
 
-for rowIndex, (time, tweets_dict) in enumerate(threads.items(), start=1):
+for rowIndex, (time, tweets_dict) in enumerate(threads.items(), start=2):  # Adjusting to start from row 2
     try:
         print(f"Traitement du thread pour l'heure : {time}")
         # Convertir l'heure du thread en Europe/Paris pour comparaison
