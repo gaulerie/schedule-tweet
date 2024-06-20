@@ -114,12 +114,12 @@ if anecdotes:
                             media = api_v1.media_upload(image_path)
                             media_ids.append(media.media_id_string)
                             os.remove(image_path)
-                if media_ids and not (choices and duration > 0):
+                if media_ids and not (choices and isinstance(duration, int) and int(duration) > 0):
                     print(f"Publication d'une anecdote avec images: {anecdote_text}, Images: {image_urls}")
                     client_v2.create_tweet(text=anecdote_text, media_ids=media_ids)
-                elif choices and duration > 0:
+                elif choices and isinstance(duration, int) and int(duration) > 0:
                     print(f"Publication d'une anecdote avec sondage: {anecdote_text}, Options: {choices}, Durée: {duration}")
-                    client_v2.create_tweet(text=anecdote_text, poll_options=choices, poll_duration_minutes=duration)
+                    client_v2.create_tweet(text=anecdote_text, poll_options=choices, poll_duration_minutes=int(duration))
                 elif anecdote_text:
                     print(f"Publication d'une anecdote sans image ni sondage: {anecdote_text}")
                     client_v2.create_tweet(text=anecdote_text)
