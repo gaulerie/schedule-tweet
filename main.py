@@ -20,7 +20,7 @@ bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
 client_v2 = tweepy.Client(bearer_token, consumer_key, consumer_secret_key, access_token, access_token_secret)
 
 # Récupérer les données depuis le déploiement Google Apps Script
-url = "https://script.google.com/macros/s/AKfycbwtEOuTLPYdv_ptpr9STlX5R0bnuIRv2_OsPFUT35LYdqaauGKIshNhu1KXOyEvV0Rw/exec"
+url = "https://script.google.com/macros/s/AKfycbywt7py_9ssN20I_rRACo48cDQlqaFiQTrhc60jvruDxozUlVzklj6MudDo8SmGEKo/exec"
 response = requests.get(url)
 
 # Vérification du statut de la réponse
@@ -71,7 +71,7 @@ def download_image(image_url):
 
 # Fonction pour marquer les entrées comme tweeté
 def mark_as_tweeted(thread_updates, anecdote_updates):
-    update_url = "https://script.google.com/macros/s/AKfycbyfgcxrccqNdZe6x8yN9gLmeGmZ_TGoOaTYI5OeIIdfMI1xXf_Ecax2a3jtxzD4TvJF/exec"
+    update_url = "https://script.google.com/macros/s/AKfycbywt7py_9ssN20I_rRACo48cDQlqaFiQTrhc60jvruDxozUlVzklj6MudDo8SmGEKo/exec"
     data = {
         "threads": thread_updates,
         "anecdotes": anecdote_updates
@@ -93,6 +93,7 @@ if anecdotes:
         image_urls = [url.strip() for url in anecdote.get("imageUrls", [])]
         choices = [choice for choice in anecdote.get("choices", []) if choice.strip()]
         duration = anecdote.get("duration", 0)
+        tweet_link = anecdote.get("tweetLink", "").strip()
 
         # Vérifier que l'anecdote a un texte ou des images valides avant de la publier
         if not anecdote_text and not image_urls:
@@ -114,7 +115,11 @@ if anecdotes:
                             media = api_v1.media_upload(image_path)
                             media_ids.append(media.media_id_string)
                             os.remove(image_path)
-                if media_ids and not (choices and isinstance(duration, int) and int(duration) > 0):
+                
+                if tweet_link:
+                    print(f"Publication d'une anecdote avec un lien de tweet: {anecdote_text}, Tweet Link: {tweet_link}")
+                    client_v2.create_tweet(text=anecdote_text, quote_tweet_id=tweet_link)
+                elif media_ids and not (choices and isinstance(duration, int) and int(duration) > 0):
                     print(f"Publication d'une anecdote avec images: {anecdote_text}, Images: {image_urls}")
                     client_v2.create_tweet(text=anecdote_text, media_ids=media_ids)
                 elif choices and isinstance(duration, int) and int(duration) > 0:
