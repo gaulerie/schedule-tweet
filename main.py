@@ -134,6 +134,15 @@ if anecdotes:
 thread_updates = []
 keys_to_remove = []
 
+def publish_tweet_in_reply_to(text, media_ids, in_reply_to_tweet_id=None):
+    tweet_params = {
+        "text": text,
+        "media_ids": media_ids if media_ids else None,
+        "in_reply_to_tweet_id": in_reply_to_tweet_id
+    }
+    tweet_params = {k: v for k, v in tweet_params.items() if v is not None}  # Remove None values
+    return client_v2.create_tweet(**tweet_params)
+
 for rowIndex, (time, tweets_dict) in enumerate(threads.items(), start=2):  # Adjusting to start from row 2
     try:
         print(f"Traitement du thread pour l'heure : {time}")
@@ -145,7 +154,7 @@ for rowIndex, (time, tweets_dict) in enumerate(threads.items(), start=2):  # Adj
         if tweet_time < now:
             print(f"Le thread est prévu pour être publié.")
             prev_tweet_id = None
-            for index in range(1, 11):
+            for index in range(1, 101):
                 tweet_text = tweets_dict.get(f"Tweet{index}", "").strip()
                 image_urls = [url.strip() for url in tweets_dict.get(f"Image{index}", [])]
                 # Fix the URLs that might be incorrectly split
@@ -154,31 +163,17 @@ for rowIndex, (time, tweets_dict) in enumerate(threads.items(), start=2):  # Adj
                 media_ids = []
 
                 for image_url in image_urls:
-                    if image_url:
+                    if (image_url):
                         image_path = download_image(image_url)
                         if image_path:
                             media = api_v1.media_upload(image_path)
                             media_ids.append(media.media_id_string)
                             os.remove(image_path)
 
-                if index == 1:
-                    if tweet_text:
-                        print(f"Publication du premier tweet avec images: {tweet_text}, Images: {image_urls}")
-                        prev_tweet = client_v2.create_tweet(text=tweet_text, media_ids=media_ids if media_ids else None)
-                        prev_tweet_id = prev_tweet.data["id"]
-                    elif media_ids:
-                        print(f"Publication du premier tweet uniquement avec des images: {image_urls}")
-                        prev_tweet = client_v2.create_tweet(media_ids=media_ids)
-                        prev_tweet_id = prev_tweet.data["id"]
-                else:
-                    if tweet_text:
-                        print(f"Publication d'un tweet de suivi avec images: {tweet_text}, Images: {image_urls}")
-                        prev_tweet = client_v2.create_tweet(text=tweet_text, media_ids=media_ids if media_ids else None, in_reply_to_tweet_id=prev_tweet_id)
-                        prev_tweet_id = prev_tweet.data["id"]
-                    elif media_ids:
-                        print(f"Publication d'un tweet de suivi uniquement avec des images: {image_urls}")
-                        prev_tweet = client_v2.create_tweet(media_ids=media_ids, in_reply_to_tweet_id=prev_tweet_id)
-                        prev_tweet_id = prev_tweet.data["id"]
+                if tweet_text or media_ids:
+                    tweet_response = publish_tweet_in_reply_to(tweet_text, media_ids, prev_tweet_id)
+                    prev_tweet_id = tweet_response.data["id"]
+                    print(f"Publié le tweet {index}: {tweet_text}")
 
             keys_to_remove.append(time)
             thread_updates.append({"rowIndex": rowIndex})
